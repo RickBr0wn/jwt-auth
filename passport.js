@@ -11,7 +11,7 @@ const cookieExtractor = req => {
   return token
 }
 
-// protecting end-points
+// middleware for protecting end-points
 passport.use(
   new JWTStrategy(
     {
@@ -33,19 +33,19 @@ passport.use(
   )
 )
 
-// authentication { username, password }
+// middleware for authenticating local strategy using username & password
 passport.use(
   new LocalStrategy((username, password, done) => {
     User.findOne({ username }, (err, user) => {
-      // error with database
+      // something went wrong with the database
       if (err) {
         return done(err)
       }
-      // user does not exist in database
+      // no user exists
       if (!user) {
         return done(null, false)
       }
-      // check password with database stored password
+      // the user has been found, so check password
       user.comparePassword(password, done)
     })
   })
