@@ -14,10 +14,10 @@ mongoose.connect(
     useUnifiedTopology: true,
   },
   () => {
-    console.log('📦 => connected to the database')
+    console.log('📦 => database')
   }
 )
 
 app.listen(5000, () => {
-  console.log(`🌎 => connected to http server`)
+  console.log(`🌎 => http server`)
 })
