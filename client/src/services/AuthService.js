@@ -1,0 +1,40 @@
+export default {
+  login: user => {
+    return fetch('/auth/login', {
+      method: 'post',
+      body: JSON.stringify(user),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(json => json)
+  },
+
+  register: user => {
+    return fetch('auth/register', {
+      method: 'post',
+      body: JSON.stringify(user),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(data => data)
+  },
+
+  logout: () => {
+    return fetch('/auth/logout')
+      .then(res => res.json())
+      .then(data => data)
+  },
+
+  isAuthenticated: () => {
+    return fetch('/auth/authenticated').then(res => {
+      if (res.status !== 401) {
+        return res.json().then(data => data)
+      }
+      return { isAuthenticated: false, user: { username: '', role: '' } }
+    })
+  },
+}
