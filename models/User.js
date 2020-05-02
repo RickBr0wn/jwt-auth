@@ -16,39 +16,46 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ['user', 'admin'],
     required: true,
-    enum: ['admin', 'user'],
   },
+  // sets type of 'todos' to accept the `_id` from the `TodoSchema`
   todos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Todo' }],
 })
 
 // hash the password before saving to database
 UserSchema.pre('save', function (next) {
-  // check to see if the password has already been hashed
-  // do not hash it twice!
-  if (this.isModified('password')) {
-    next()
+  console.log('🐛 - pre')
+  // prevents hashing an already hashed password
+  if (!this.isModified('password')) {
+    console.log('🐛 - !this.isModified')
+    return next()
   }
-  bcrypt.hash(this.password, 10, (err, hash) => {
-    if (err) {
-      return next(err)
+  // args: (password, salt, callback)
+  bcrypt.hash(this.password, 10, (error, hashedPassword) => {
+    console.log(`🐛 - hashedPassword: ${hashedPassword}`)
+    if (error) {
+      return next(error)
     }
-    this.password = hash
+    this.password = hashedPassword
+    next()
   })
 })
 
 // compare the plain text version of the password (from the client)
 // with the hashed password on the database
 UserSchema.methods.comparePassword = function (password, callback) {
-  bcrypt.compare(password, this.password, (err, isMatch) => {
-    if (err) {
-      callback(err)
-    } else {
-      if (!isMatch) {
-        return callback(null, isMatch)
-      }
-      return callback(null, this)
+  // args: (password entered via the UI,
+  //       hashed password attached to the userSchema in the database,
+  //       callback)
+  bcrypt.compare(password, this.password, (error, isMatch) => {
+    if (error) {
+      return callback(error)
     }
+    if (!isMatch) {
+      return callback(null, isMatch)
+    }
+    return callback(null, this)
   })
 }
 

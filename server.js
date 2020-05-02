@@ -1,6 +1,7 @@
 const express = require('express')
 const cookie = require('cookie-parser')
 const mongoose = require('mongoose')
+const authRouter = require('./routes/authRouter')
 
 const app = express()
 
@@ -17,6 +18,8 @@ mongoose.connect(
     console.log('📦 => database')
   }
 )
+
+app.use('/auth', authRouter)
 
 app.listen(5000, () => {
   console.log(`🌎 => http server`)
