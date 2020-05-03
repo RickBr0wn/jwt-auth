@@ -1,9 +1,10 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import AuthService from '../services/AuthService'
 
-export const AuthContext = createContext()
+const AuthContext = createContext()
 
-export default ({ children }) => {
+const AuthProvider = ({ children }) => {
   // TODO: convert to useReducer
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -32,3 +33,17 @@ export default ({ children }) => {
     </AuthContext.Provider>
   )
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.array,
+}
+
+function useAuthContext() {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuthContext must be used within a AuthProvider')
+  }
+  return context
+}
+
+export { AuthProvider, useAuthContext }

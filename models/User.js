@@ -25,15 +25,12 @@ const UserSchema = new mongoose.Schema({
 
 // hash the password before saving to database
 UserSchema.pre('save', function (next) {
-  console.log('🐛 - pre')
   // prevents hashing an already hashed password
   if (!this.isModified('password')) {
-    console.log('🐛 - !this.isModified')
     return next()
   }
   // args: (password, salt, callback)
   bcrypt.hash(this.password, 10, (error, hashedPassword) => {
-    console.log(`🐛 - hashedPassword: ${hashedPassword}`)
     if (error) {
       return next(error)
     }

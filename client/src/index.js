@@ -1,12 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './styles.css'
 import App from './components/App'
-import AuthProvider from './context/AuthContext'
+import { AuthProvider } from './context/AuthContext'
+import { CSSReset, theme, ThemeProvider } from '@chakra-ui/core'
 
 ReactDOM.render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>,
+  <ThemeProvider theme={theme}>
+    <AuthProvider>
+      <CSSReset />
+      <App />
+    </AuthProvider>
+  </ThemeProvider>,
   document.getElementById('root')
 )

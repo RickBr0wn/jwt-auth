@@ -24,6 +24,7 @@ module.exports = {
         target: 'http://localhost:5000',
       },
     },
+    historyApiFallback: true,
   },
   module: {
     rules: [
