@@ -18,7 +18,7 @@ import AuthService from '../services/AuthService'
 const Login = props => {
   const [userObj, setUserObj] = useState({ username: '', password: '' })
   const { setUser, setIsAuthenticated } = useAuthContext()
-  const isDisabled = !userObj.username && !userObj.password
+  const isDisabled = !userObj.username || !userObj.password
   const [show, setShow] = React.useState(false)
   const handleClick = () => setShow(!show)
   const toast = useToast()
