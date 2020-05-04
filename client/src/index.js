@@ -6,8 +6,8 @@ import { CSSReset, theme, ThemeProvider } from '@chakra-ui/core'
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
+    <CSSReset />
     <AuthProvider>
-      <CSSReset />
       <App />
     </AuthProvider>
   </ThemeProvider>,

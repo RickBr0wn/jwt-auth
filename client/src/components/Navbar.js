@@ -5,8 +5,6 @@ import { Box, Flex, useToast } from '@chakra-ui/core'
 import AuthService from '../services/AuthService'
 import { useAuthContext } from '../context/AuthContext'
 
-// user : {username: "testing123", role: "admin"}
-
 const Navbar = ({ history }) => {
   const {
     isAuthenticated,
@@ -38,7 +36,7 @@ const Navbar = ({ history }) => {
       data-testid="navbar"
       padding="5px 20px"
       width="100vw"
-      height="30px"
+      height="33px"
       backgroundImage="linear-gradient(to right, #83a4d4, #b6fbff)"
       justifyContent="space-between">
       <Link data-testid="link" to="/">
