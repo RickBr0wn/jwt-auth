@@ -17,7 +17,8 @@ import {
 import AuthService from '../services/AuthService'
 
 const Register = props => {
-  const [user, setUser] = useState({ username: '', password: '', role: 'user' })
+  const [role, setRole] = useState('user')
+  const [user, setUser] = useState({ username: '', password: '', role })
   let timerID = useRef(null)
   const [show, setShow] = React.useState(false)
   const handleClick = () => setShow(!show)
@@ -33,7 +34,7 @@ const Register = props => {
   const onSubmit = e => {
     console.log({ user })
     e.preventDefault()
-    AuthService.register(user).then(({ message }) => {
+    AuthService.register({ ...user, role }).then(({ message }) => {
       resetForm()
       toast({
         title: 'Success.',
@@ -60,7 +61,7 @@ const Register = props => {
 
   const onChange = e => setUser({ ...user, [e.target.name]: e.target.value })
 
-  const resetForm = () => setUser({ username: '', password: '', role: '' })
+  const resetForm = () => setUser({ username: '', password: '', role: 'user' })
 
   return (
     <Flex
@@ -112,7 +113,9 @@ const Register = props => {
               Role:
             </FormLabel>
             <RadioGroup
-              onChange={onChange}
+              onChange={() =>
+                setRole(prev => (prev === 'user' ? 'admin' : 'user'))
+              }
               defaultValue="user"
               spacing={15}
               backgroundColor="#fff"
@@ -121,10 +124,19 @@ const Register = props => {
               padding="8px"
               mt="-14px"
               isInline>
-              <Radio value="admin">Admin</Radio>
-              <Radio value="user">User</Radio>
+              <Radio variantColor="teal" value="admin">
+                Admin
+              </Radio>
+              <Radio variantColor="teal" value="user">
+                User
+              </Radio>
             </RadioGroup>
-            <Button mt="20px" width="100%" type="submit" disabled={isDisabled}>
+            <Button
+              mt="20px"
+              width="100%"
+              type="submit"
+              variantColor="teal"
+              disabled={isDisabled}>
               Register
             </Button>
           </Stack>
