@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import TodoItem from './TodoItem'
-import Message from './Message'
+import { Box } from '@chakra-ui/core'
+import { DragDropContext } from 'react-beautiful-dnd'
+// import { useAuthContext } from '../context/AuthContext'
+import Column from './Column'
+// import Message from './Message'
 import TodoService from '../services/TodoService'
-import { useAuthContext } from '../context/AuthContext'
 
 const Todos = () => {
-  const [todo, setTodo] = useState({ name: '' })
+  // const [todo, setTodo] = useState({ name: '' })
   const [todos, setTodos] = useState([])
-  const [message, setMessage] = useState(null)
-  const { setUser, setIsAuthenticated } = useAuthContext()
+  // const [message, setMessage] = useState(null)
+  // const { setUser, setIsAuthenticated } = useAuthContext()
 
   useEffect(() => {
     TodoService.getTodos().then(data => {
@@ -16,41 +18,43 @@ const Todos = () => {
     })
   }, [])
 
-  const resetForm = () => {
-    setTodo({ name: '' })
-  }
+  // const resetForm = () => {
+  //   setTodo({ name: '' })
+  // }
 
-  const onChange = e => setTodo({ name: e.target.value })
+  // const onChange = e => setTodo({ name: e.target.value })
 
-  const onSubmit = e => {
-    e.preventDefault()
-    TodoService.postTodo(todo).then(({ message }) => {
-      resetForm()
-      if (!message.msgError) {
-        TodoService.getTodos().then(data => {
-          console.log({ data })
-          setTodos(data.todos)
-        })
-        setMessage(message)
-      } else if (message.msgBody === 'UnAuthorized') {
-        // token has expired
-        setMessage(message)
-        setUser({ username: '', role: '' })
-        setIsAuthenticated(false)
-      } else {
-        setMessage(message)
-      }
-    })
-  }
+  // const onSubmit = e => {
+  //   e.preventDefault()
+  //   TodoService.postTodo(todo).then(({ message }) => {
+  //     resetForm()
+  //     if (!message.msgError) {
+  //       TodoService.getTodos().then(data => {
+  //         console.log({ data })
+  //         setTodos(data.todos)
+  //       })
+  //       setMessage(message)
+  //     } else if (message.msgBody === 'UnAuthorized') {
+  //       // token has expired
+  //       setMessage(message)
+  //       setUser({ username: '', role: '' })
+  //       setIsAuthenticated(false)
+  //     } else {
+  //       setMessage(message)
+  //     }
+  //   })
+  // }
+
+  const onDragEnd = () => {}
+
+  console.log({ todos })
 
   return (
-    <div>
-      <ul className="list-group">
-        {todos.map(todo => (
-          <TodoItem key={todo._id} todo={todo.name} />
-        ))}
-      </ul>
-      <br />
+    <Box padding="20px" maxWidth="400px" margin="0 auto" overflowY="scroll">
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Column todos={todos} />
+      </DragDropContext>
+      {/* <br />
       <form onSubmit={onSubmit}>
         <label htmlFor="todo">Enter Todo</label>
         <input
@@ -64,8 +68,8 @@ const Todos = () => {
           Submit
         </button>
       </form>
-      {message && <Message message={message} />}
-    </div>
+      {message && <Message message={message} />} */}
+    </Box>
   )
 }
 
