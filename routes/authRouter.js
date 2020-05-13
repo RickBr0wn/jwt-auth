@@ -5,6 +5,8 @@ const passportConfig = require('../passport')
 const JWT = require('jsonwebtoken')
 const User = require('../models/User')
 const Todo = require('../models/Todo')
+const Task = require('../models/TaskSchema')
+const Column = require('../models/ColumnSchema')
 
 const signToken = userId =>
   JWT.sign(
@@ -15,6 +17,163 @@ const signToken = userId =>
     'rick_brown',
     { expiresIn: '1h' }
   )
+
+authRouter.get(
+  '/get_all_tasks_from_column/:columnId',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const columnId = req.params.columnId
+    try {
+      await Column.findById({ _id: columnId })
+        .populate('tasks')
+        .exec()
+        .then((doc, err) => {
+          if (err) {
+            next(err)
+          }
+          return res.status(200).json({
+            count: doc.tasks.length,
+            tasks: doc.tasks,
+            error: false,
+          })
+        })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
+
+authRouter.post(
+  '/add_column',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const column = new Column()
+      await column.save(async err => {
+        if (err) {
+          next(err)
+        }
+
+        req.user.columns.push(column._id)
+
+        await req.user.save(err => {
+          if (err) {
+            next(err)
+          }
+        })
+      })
+      return res
+        .status(200)
+        .json({ message: `🤖 - successfully created column #${column._id}` })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
+
+authRouter.post(
+  '/add_task/:columnId',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const columnId = req.params.columnId
+    const task = new Task(req.body)
+    let newTaskOrder = []
+
+    await task.save(async (taskError, taskDocument) => {
+      try {
+        await task.save(async err => {
+          if (err) {
+            next(err)
+          }
+
+          newTaskOrder.push(taskDocument._id)
+
+          await Column.findById({ _id: columnId }).then((doc, err) => {
+            if (err) {
+              next(err)
+            }
+            doc.tasks.forEach(task => newTaskOrder.push(task))
+          })
+
+          await Column.updateOne(
+            { _id: columnId },
+            { $set: { tasks: newTaskOrder } },
+            err => {
+              if (err) {
+                next(err)
+              }
+            }
+          )
+
+          req.user.tasks.push(task._id)
+          // req.user.columns.push(task._id)
+
+          console.log('req.user: ', req.user)
+
+          await req.user.save(err => {
+            if (err) {
+              next(err)
+            }
+          })
+
+          await Column.findById({ _id: columnId })
+            .populate('tasks')
+            .exec()
+            .then((doc, err) => {
+              if (err) {
+                next(err)
+              }
+            })
+        })
+        return res.status(200).json({
+          message: `🤖 - successfully created task #${task._id} in column #${columnId}`,
+        })
+      } catch (err) {
+        next(err)
+      }
+    })
+  }
+)
+
+authRouter.post(
+  '/move_task/:columnId',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const columnId = req.params.columnId
+    const { taskId, to, from } = req.body
+    let newTaskOrder = []
+
+    try {
+      await Column.findById({ _id: columnId }).then((doc, err) => {
+        if (err) {
+          next(err)
+        }
+        newTaskOrder = doc.tasks
+        newTaskOrder.splice(from, 1)
+        newTaskOrder.splice(to, 0, taskId)
+      })
+
+      await Column.updateOne(
+        { _id: columnId },
+        { $set: { tasks: newTaskOrder } },
+        err => {
+          if (err) {
+            next(err)
+          }
+        }
+      )
+
+      return res.status(200).json({
+        message: {
+          msgBody: `🤖 - task ${taskId} has been moved from index ${from} to index ${to}.`,
+          error: false,
+        },
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 authRouter.post('/register', (req, res) => {
   const { username, password, role } = req.body

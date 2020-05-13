@@ -21,6 +21,9 @@ const UserSchema = new mongoose.Schema({
   },
   // sets type of 'todos' to accept the `_id` from the `TodoSchema`
   todos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Todo' }],
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
+  columns: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Column' }],
+  columnOrder: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Column' }],
 })
 
 // hash the password before saving to database
