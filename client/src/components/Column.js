@@ -1,31 +1,42 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Stack } from '@chakra-ui/core'
-import { Droppable } from 'react-beautiful-dnd'
-import TodoItem from './TodoItem'
+import { Box, Divider, Stack, Text } from '@chakra-ui/core'
+// import { Droppable, Draggable } from 'react-beautiful-dnd'
 
-const Column = ({ todos }) => {
+const Column = ({ column }) => {
   return (
-    <Droppable droppableId={`column-1`}>
-      {provided => (
-        <div
-          className="list-group"
-          ref={provided.innerRef}
-          {...provided.droppableProps}>
-          <Stack>
-            {todos.map((todo, idx) => (
-              <TodoItem key={todo._id} todo={todo} index={idx} />
-            ))}
-          </Stack>
-        </div>
-      )}
-    </Droppable>
+    <Box
+      key={column._id}
+      backgroundColor="#ddd"
+      borderRadius="10px"
+      height="100%"
+      overflowY="scroll"
+      margin="20px"
+      padding="10px"
+      maxWidth="400px">
+      <Text fontSize="2xl">Column #{column._id}</Text>
+
+      <Stack>
+        {column[column._id] &&
+          column[column._id].map(task => (
+            <Box
+              key={task._id}
+              backgroundColor="#fff"
+              padding="20px"
+              borderRadius="10px"
+              marginBottom="10px">
+              <Text fontSize="lg">{task.title}</Text>
+              <Divider />
+              <Text>{task.body}</Text>
+            </Box>
+          ))}
+      </Stack>
+    </Box>
   )
 }
 
 Column.propTypes = {
-  todos: PropTypes.array.isRequired,
-  snapshot: PropTypes.object,
+  column: PropTypes.object,
 }
 
 export default Column

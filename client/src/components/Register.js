@@ -32,7 +32,6 @@ const Register = props => {
   }, [])
 
   const onSubmit = e => {
-    console.log({ user })
     e.preventDefault()
     AuthService.register({ ...user, role }).then(({ message }) => {
       resetForm()

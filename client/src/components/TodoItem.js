@@ -9,6 +9,7 @@ const TodoItem = ({ todo, index, ...rest }) => {
       {provided => (
         <>
           <Box
+            key={todo._id}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             ref={provided.innerRef}
@@ -18,8 +19,8 @@ const TodoItem = ({ todo, index, ...rest }) => {
             backgroundColor="lightgrey"
             borderWidth="1px"
             {...rest}>
-            <Heading fontSize="xl">{todo.name}</Heading>
-            <Text mt={4}>{todo.name}</Text>
+            <Heading fontSize="xl">{todo.title}</Heading>
+            <Text mt={4}>{todo.body}</Text>
           </Box>
           {provided.placeholder}
         </>

@@ -2,9 +2,11 @@ const express = require('express')
 const cookie = require('cookie-parser')
 const mongoose = require('mongoose')
 const authRouter = require('./routes/authRouter')
+const cors = require('cors')
 
 const app = express()
 
+app.use(cors())
 app.use(cookie())
 app.use(express.json())
 

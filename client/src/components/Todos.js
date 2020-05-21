@@ -47,7 +47,7 @@ const Todos = () => {
 
   const onDragEnd = () => {}
 
-  console.log({ todos })
+  // console.log({ todos })
 
   return (
     <Box padding="20px" maxWidth="400px" margin="0 auto" overflowY="scroll">

@@ -50,6 +50,9 @@ const Navbar = ({ history }) => {
                 <Box marginRight="25px">Admin</Box>
               </Link>
             ) : null}
+            <Link to="/tasks">
+              <Box marginRight="25px">Tasks</Box>
+            </Link>
             <Link to="/todos">
               <Box marginRight="25px">Todos</Box>
             </Link>

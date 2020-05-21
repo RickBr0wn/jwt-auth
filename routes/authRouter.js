@@ -19,22 +19,32 @@ const signToken = userId =>
   )
 
 authRouter.get(
-  '/get_all_tasks_from_column/:columnId',
+  '/get_all_data',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
-    const columnId = req.params.columnId
+    let returnArr = []
     try {
-      await Column.findById({ _id: columnId })
-        .populate('tasks')
-        .exec()
-        .then((doc, err) => {
+      await User.findById({ _id: req.user._id })
+        .populate('columns')
+        .exec((err, columnDoc) => {
           if (err) {
             next(err)
           }
-          return res.status(200).json({
-            count: doc.tasks.length,
-            tasks: doc.tasks,
-            error: false,
+          columnDoc.columns.map(async column => {
+            returnArr.push({ [column._id]: [], _id: column._id })
+            await Column.findById({ _id: column._id })
+              .populate('tasks')
+              .exec((err, taskDoc) => {
+                if (err) {
+                  next(err)
+                }
+                returnArr.forEach((col, idx) => {
+                  if (col[column._id]) {
+                    col[column._id] = taskDoc.tasks
+                  }
+                })
+                return res.status(200).json(returnArr)
+              })
           })
         })
     } catch (error) {
@@ -106,9 +116,6 @@ authRouter.post(
           )
 
           req.user.tasks.push(task._id)
-          // req.user.columns.push(task._id)
-
-          console.log('req.user: ', req.user)
 
           await req.user.save(err => {
             if (err) {

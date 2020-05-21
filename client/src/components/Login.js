@@ -37,7 +37,7 @@ const Login = props => {
             duration: 2000,
             isClosable: true,
           })
-          props.history.push('/todos')
+          props.history.push('/tasks')
           // } else {
           //   // TODO: broken here
           //   toast({
