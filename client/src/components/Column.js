@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Box, Divider, Stack, Text } from '@chakra-ui/core'
-// import { Droppable, Draggable } from 'react-beautiful-dnd'
+import { Box, Stack, Text } from '@chakra-ui/core'
+import Task from './Task'
+import { Droppable } from 'react-beautiful-dnd'
 
 const Column = ({ column }) => {
   return (
@@ -9,28 +10,25 @@ const Column = ({ column }) => {
       key={column._id}
       backgroundColor="#ddd"
       borderRadius="10px"
-      height="100%"
+      height="750px"
       overflowY="scroll"
-      margin="20px"
+      margin="20px auto"
       padding="10px"
       maxWidth="400px">
       <Text fontSize="2xl">Column #{column._id}</Text>
-
-      <Stack>
-        {column[column._id] &&
-          column[column._id].map(task => (
-            <Box
-              key={task._id}
-              backgroundColor="#fff"
-              padding="20px"
-              borderRadius="10px"
-              marginBottom="10px">
-              <Text fontSize="lg">{task.title}</Text>
-              <Divider />
-              <Text>{task.body}</Text>
-            </Box>
-          ))}
-      </Stack>
+      <Droppable droppableId={column._id}>
+        {provided => (
+          <Box ref={provided.innerRef} {...provided.droppableProps}>
+            <Stack>
+              {column[column._id] &&
+                column[column._id].map((task, idx) => (
+                  <Task key={task._id} task={task} index={idx} />
+                ))}
+              {provided.placeholder}
+            </Stack>
+          </Box>
+        )}
+      </Droppable>
     </Box>
   )
 }

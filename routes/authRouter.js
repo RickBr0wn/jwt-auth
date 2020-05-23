@@ -142,12 +142,20 @@ authRouter.post(
   }
 )
 
+// {
+//   movedTaskId: draggableId,
+//   fromColumn: source.droppableId,
+//   toColumn: destination.droppableId,
+//   fromIndex: source.index,
+//   toIndex: destination.index,
+// }
+
 authRouter.post(
   '/move_task/:columnId',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     const columnId = req.params.columnId
-    const { taskId, to, from } = req.body
+    const { movedTaskId, toIndex, fromIndex, toColumn, fromColumn } = req.body
     let newTaskOrder = []
 
     try {

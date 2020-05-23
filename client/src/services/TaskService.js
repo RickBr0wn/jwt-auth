@@ -8,10 +8,10 @@ export default {
       }
       return res.json().then(data => data)
     }),
-  moveTask: async task =>
-    await fetch(`/auth/move_task/5ebb28e1a75c327d700b0d2e`, {
+  moveTask: async obj =>
+    await fetch(`/auth/move_task/${obj.columnId}`, {
       method: 'post',
-      body: JSON.stringify(task),
+      body: JSON.stringify(obj),
       headers: {
         'Content-Type': 'application/json',
       },
