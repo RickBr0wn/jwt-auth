@@ -5,6 +5,8 @@ const passportConfig = require('../passport')
 const JWT = require('jsonwebtoken')
 const User = require('../models/User')
 const Todo = require('../models/Todo')
+const Task = require('../models/TaskSchema')
+const Column = require('../models/ColumnSchema')
 
 const signToken = userId =>
   JWT.sign(
@@ -15,6 +17,226 @@ const signToken = userId =>
     'rick_brown',
     { expiresIn: '1h' }
   )
+
+authRouter.get(
+  '/get_all_data',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    let returnArr = []
+
+    try {
+      await User.findById({ _id: req.user._id })
+        .populate('columns')
+        .exec((err, columnDoc) => {
+          if (err) {
+            next(err)
+          }
+          columnDoc.columns.map(async column => {
+            returnArr.push({ [column._id]: [], _id: column._id })
+            await Column.findById({ _id: column._id })
+              .populate('tasks')
+              .exec((err, taskDoc) => {
+                if (err) {
+                  next(err)
+                }
+                returnArr.forEach((col, idx) => {
+                  if (col[column._id]) {
+                    col[column._id] = taskDoc.tasks
+                  }
+                })
+                return res.status(200).json(returnArr)
+              })
+          })
+        })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
+
+authRouter.post(
+  '/add_column',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const column = new Column()
+      await column.save(async err => {
+        if (err) {
+          next(err)
+        }
+
+        req.user.columns.push(column._id)
+
+        await req.user.save(err => {
+          if (err) {
+            next(err)
+          }
+        })
+      })
+      return res
+        .status(200)
+        .json({ message: `🤖 - successfully created column #${column._id}` })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
+
+authRouter.post(
+  '/add_task/:columnId',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const columnId = req.params.columnId
+    const task = new Task(req.body)
+    let newTaskOrder = []
+
+    await task.save(async (taskError, taskDocument) => {
+      try {
+        await task.save(async err => {
+          if (err) {
+            next(err)
+          }
+
+          newTaskOrder.push(taskDocument._id)
+
+          await Column.findById({ _id: columnId }).then((doc, err) => {
+            if (err) {
+              next(err)
+            }
+            doc.tasks.forEach(task => newTaskOrder.push(task))
+          })
+
+          await Column.updateOne(
+            { _id: columnId },
+            { $set: { tasks: newTaskOrder } },
+            err => {
+              if (err) {
+                next(err)
+              }
+            }
+          )
+
+          req.user.tasks.push(task._id)
+
+          await req.user.save(err => {
+            if (err) {
+              next(err)
+            }
+          })
+
+          await Column.findById({ _id: columnId })
+            .populate('tasks')
+            .exec()
+            .then((doc, err) => {
+              if (err) {
+                next(err)
+              }
+            })
+        })
+        return res.status(200).json({
+          message: `🤖 - successfully created task #${task._id} in column #${columnId}`,
+        })
+      } catch (err) {
+        next(err)
+      }
+    })
+  }
+)
+
+//   try {
+//     await Column.findById({ _id: columnId }).then((doc, err) => {
+//       if (err) {
+//         next(err)
+//       }
+//       newTaskOrder = doc.tasks
+//       newTaskOrder.splice(from, 1)
+//       newTaskOrder.splice(to, 0, taskId)
+//     })
+
+//     await Column.updateOne(
+//       { _id: columnId },
+//       { $set: { tasks: newTaskOrder } },
+//       err => {
+//         if (err) {
+//           next(err)
+//         }
+//       }
+//     )
+
+//     return res.status(200).json({
+//       message: {
+//         msgBody: `🤖 - task ${taskId} has been moved from index ${from} to index ${to}.`,
+//         error: false,
+//       },
+//     })
+//   } catch (error) {
+//     next(error)
+//   }
+// }
+
+// {
+//   movedTaskId: draggableId,
+//   fromColumn: source.droppableId,
+//   toColumn: destination.droppableId,
+//   fromIndex: source.index,
+//   toIndex: destination.index,
+// }
+
+authRouter.post(
+  '/move_task',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const { movedTaskId, toIndex, fromIndex, toColumn, fromColumn } = req.body
+    let newTaskOrder = []
+    let original = []
+
+    try {
+      await Column.findById({ _id: fromColumn }).then((columnDoc, err) => {
+        if (err) {
+          next(err)
+        }
+        original = columnDoc
+
+        newTaskOrder = columnDoc.tasks
+        newTaskOrder.splice(fromIndex, 1)
+
+        Column.updateOne(
+          { _id: fromColumn },
+          { $set: { tasks: newTaskOrder } },
+          err => {
+            if (err) {
+              next(err)
+            }
+          }
+        )
+      })
+
+      await Column.findById({ _id: toColumn }).then((columnDoc, err) => {
+        if (err) {
+          next(err)
+        }
+        newTaskOrder = columnDoc.tasks
+        newTaskOrder.splice(toIndex, 0, movedTaskId)
+
+        Column.updateOne(
+          { _id: toColumn },
+          { $set: { tasks: newTaskOrder } },
+          err => {
+            if (err) {
+              next(err)
+            }
+            return res.status(200).json({
+              original,
+              columnDoc,
+            })
+          }
+        )
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 authRouter.post('/register', (req, res) => {
   const { username, password, role } = req.body

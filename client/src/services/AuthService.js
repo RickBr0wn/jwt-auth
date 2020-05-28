@@ -12,7 +12,7 @@ export default {
   },
 
   register: user => {
-    return fetch('auth/register', {
+    return fetch('/auth/register', {
       method: 'post',
       body: JSON.stringify(user),
       headers: {

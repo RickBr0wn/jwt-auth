@@ -7,6 +7,7 @@ import Register from './Register'
 import Admin from './Admin'
 import Todos from './Todos'
 import Layout from './Layout'
+import Tasks from './Tasks'
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/admin" component={Admin} />
+        <Route path="/tasks" component={Tasks} />
         <Route path="/todos" component={Todos} />
       </Layout>
     </Router>
