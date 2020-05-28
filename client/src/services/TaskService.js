@@ -9,7 +9,7 @@ export default {
       return res.json().then(data => data)
     }),
   moveTask: async obj =>
-    await fetch(`/auth/move_task/${obj.columnId}`, {
+    await fetch(`/auth/move_task`, {
       method: 'post',
       body: JSON.stringify(obj),
       headers: {

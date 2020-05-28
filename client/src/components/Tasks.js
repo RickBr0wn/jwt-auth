@@ -13,8 +13,7 @@ const Tasks = () => {
     })
   }, [])
 
-  // draggableId => extra param
-  const onDragEnd = ({ destination, source }) => {
+  const onDragEnd = ({ destination, source, draggableId }) => {
     if (!destination) {
       return
     }
@@ -43,17 +42,19 @@ const Tasks = () => {
       movingObj
     )
 
-    // const sendingObject = {
-    //   movedTaskId: draggableId,
-    //   fromColumn: source.droppableId,
-    //   toColumn: destination.droppableId,
-    //   fromIndex: source.index,
-    //   toIndex: destination.index,
-    // }
+    const sendingObject = {
+      movedTaskId: draggableId,
+      fromColumn: source.droppableId,
+      toColumn: destination.droppableId,
+      fromIndex: source.index,
+      toIndex: destination.index,
+    }
 
-    // TaskService.moveTask(sendingObject)
-    //   .then(res => console.log(res))
-    //   .catch(err => console.log('🐻' + err))
+    console.log(sendingObject)
+
+    TaskService.moveTask(sendingObject)
+      .then(res => console.log(res))
+      .catch(err => console.log('🐻' + err))
 
     // TODO: this implementation will only work with one column
     setColumns([mutatingColumnObject])

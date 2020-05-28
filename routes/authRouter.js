@@ -23,6 +23,7 @@ authRouter.get(
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     let returnArr = []
+
     try {
       await User.findById({ _id: req.user._id })
         .populate('columns')
@@ -142,6 +143,37 @@ authRouter.post(
   }
 )
 
+//   try {
+//     await Column.findById({ _id: columnId }).then((doc, err) => {
+//       if (err) {
+//         next(err)
+//       }
+//       newTaskOrder = doc.tasks
+//       newTaskOrder.splice(from, 1)
+//       newTaskOrder.splice(to, 0, taskId)
+//     })
+
+//     await Column.updateOne(
+//       { _id: columnId },
+//       { $set: { tasks: newTaskOrder } },
+//       err => {
+//         if (err) {
+//           next(err)
+//         }
+//       }
+//     )
+
+//     return res.status(200).json({
+//       message: {
+//         msgBody: `🤖 - task ${taskId} has been moved from index ${from} to index ${to}.`,
+//         error: false,
+//       },
+//     })
+//   } catch (error) {
+//     next(error)
+//   }
+// }
+
 // {
 //   movedTaskId: draggableId,
 //   fromColumn: source.droppableId,
@@ -151,38 +183,54 @@ authRouter.post(
 // }
 
 authRouter.post(
-  '/move_task/:columnId',
+  '/move_task',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
-    const columnId = req.params.columnId
     const { movedTaskId, toIndex, fromIndex, toColumn, fromColumn } = req.body
     let newTaskOrder = []
+    let original = []
 
     try {
-      await Column.findById({ _id: columnId }).then((doc, err) => {
+      await Column.findById({ _id: fromColumn }).then((columnDoc, err) => {
         if (err) {
           next(err)
         }
-        newTaskOrder = doc.tasks
-        newTaskOrder.splice(from, 1)
-        newTaskOrder.splice(to, 0, taskId)
+        original = columnDoc
+
+        newTaskOrder = columnDoc.tasks
+        newTaskOrder.splice(fromIndex, 1)
+
+        Column.updateOne(
+          { _id: fromColumn },
+          { $set: { tasks: newTaskOrder } },
+          err => {
+            if (err) {
+              next(err)
+            }
+          }
+        )
       })
 
-      await Column.updateOne(
-        { _id: columnId },
-        { $set: { tasks: newTaskOrder } },
-        err => {
-          if (err) {
-            next(err)
-          }
+      await Column.findById({ _id: toColumn }).then((columnDoc, err) => {
+        if (err) {
+          next(err)
         }
-      )
+        newTaskOrder = columnDoc.tasks
+        newTaskOrder.splice(toIndex, 0, movedTaskId)
 
-      return res.status(200).json({
-        message: {
-          msgBody: `🤖 - task ${taskId} has been moved from index ${from} to index ${to}.`,
-          error: false,
-        },
+        Column.updateOne(
+          { _id: toColumn },
+          { $set: { tasks: newTaskOrder } },
+          err => {
+            if (err) {
+              next(err)
+            }
+            return res.status(200).json({
+              original,
+              columnDoc,
+            })
+          }
+        )
       })
     } catch (error) {
       next(error)
