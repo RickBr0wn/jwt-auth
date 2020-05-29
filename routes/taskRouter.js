@@ -142,35 +142,35 @@ taskRouter.post(
   }
 )
 
-taskRouter.get(
-  '/get_all_tasks_from_column/:columnId',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res, next) => {
-    const columnId = req.params.columnId
-    try {
-      await Column.findById({ _id: columnId })
-        .populate('tasks')
-        .exec()
-        .then((doc, err) => {
-          if (err) {
-            return res.status(500).json({
-              message: {
-                msgBody:
-                  '🤖 - an error has occurred with the database whilst retrieving all of the tasks.',
-                error: true,
-              },
-            })
-          }
-          return res.status(200).json({
-            count: doc.tasks.length,
-            tasks: doc.tasks,
-            error: false,
-          })
-        })
-    } catch (error) {
-      next(error)
-    }
-  }
-)
+// taskRouter.get(
+//   '/get_all_tasks_from_column/:columnId',
+//   passport.authenticate('jwt', { session: false }),
+//   async (req, res, next) => {
+//     const columnId = req.params.columnId
+//     try {
+//       await Column.findById({ _id: columnId })
+//         .populate('tasks')
+//         .exec()
+//         .then((doc, err) => {
+//           if (err) {
+//             return res.status(500).json({
+//               message: {
+//                 msgBody:
+//                   '🤖 - an error has occurred with the database whilst retrieving all of the tasks.',
+//                 error: true,
+//               },
+//             })
+//           }
+//           return res.status(200).json({
+//             count: doc.tasks.length,
+//             tasks: doc.tasks,
+//             error: false,
+//           })
+//         })
+//     } catch (error) {
+//       next(error)
+//     }
+//   }
+// )
 
 module.exports = taskRouter
