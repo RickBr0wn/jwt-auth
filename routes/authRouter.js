@@ -22,37 +22,75 @@ authRouter.get(
   '/get_all_data',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
-    let returnArr = []
-
     try {
       await User.findById({ _id: req.user._id })
-        .populate('columns')
-        .exec((err, columnDoc) => {
+        .populate({ path: 'columns', populate: { path: 'tasks' } })
+        .exec(async (err, userDoc) => {
           if (err) {
             next(err)
           }
-          columnDoc.columns.map(async column => {
-            returnArr.push({ [column._id]: [], _id: column._id })
-            await Column.findById({ _id: column._id })
-              .populate('tasks')
-              .exec((err, taskDoc) => {
-                if (err) {
-                  next(err)
-                }
-                returnArr.forEach((col, idx) => {
-                  if (col[column._id]) {
-                    col[column._id] = taskDoc.tasks
-                  }
-                })
-                return res.status(200).json(returnArr)
-              })
-          })
+          return res.status(200).json(userDoc.columns)
         })
     } catch (error) {
       next(error)
     }
   }
 )
+
+const data = [
+  ({
+    '5ec6912213debd20d73ce27b': [
+      {
+        _id: '5ecfd7b31db1b0c9d33cc598',
+        title: 'Test title #3',
+        body:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        __v: 0,
+      },
+      {
+        _id: '5ecfd7ae1db1b0c9d33cc597',
+        title: 'Test title #2',
+        body:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        __v: 0,
+      },
+      {
+        _id: '5ecfd7a91db1b0c9d33cc596',
+        title: 'Test title #1',
+        body:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        __v: 0,
+      },
+    ],
+    _id: '5ec6912213debd20d73ce27b',
+  },
+  {
+    '5ecfd673b21946c8c822ac38': [
+      {
+        _id: '5ecfd7d71db1b0c9d33cc59b',
+        title: 'Test title #6',
+        body:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        __v: 0,
+      },
+      {
+        _id: '5ecfd7d31db1b0c9d33cc59a',
+        title: 'Test title #5',
+        body:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        __v: 0,
+      },
+      {
+        _id: '5ecfd7cf1db1b0c9d33cc599',
+        title: 'Test title #4',
+        body:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        __v: 0,
+      },
+    ],
+    _id: '5ecfd673b21946c8c822ac38',
+  }),
+]
 
 authRouter.post(
   '/add_column',
@@ -142,45 +180,6 @@ authRouter.post(
     })
   }
 )
-
-//   try {
-//     await Column.findById({ _id: columnId }).then((doc, err) => {
-//       if (err) {
-//         next(err)
-//       }
-//       newTaskOrder = doc.tasks
-//       newTaskOrder.splice(from, 1)
-//       newTaskOrder.splice(to, 0, taskId)
-//     })
-
-//     await Column.updateOne(
-//       { _id: columnId },
-//       { $set: { tasks: newTaskOrder } },
-//       err => {
-//         if (err) {
-//           next(err)
-//         }
-//       }
-//     )
-
-//     return res.status(200).json({
-//       message: {
-//         msgBody: `🤖 - task ${taskId} has been moved from index ${from} to index ${to}.`,
-//         error: false,
-//       },
-//     })
-//   } catch (error) {
-//     next(error)
-//   }
-// }
-
-// {
-//   movedTaskId: draggableId,
-//   fromColumn: source.droppableId,
-//   toColumn: destination.droppableId,
-//   fromIndex: source.index,
-//   toIndex: destination.index,
-// }
 
 authRouter.post(
   '/move_task',
