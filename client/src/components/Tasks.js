@@ -29,17 +29,18 @@ const Tasks = () => {
 
     columns.forEach(columnObj => {
       if (columnObj._id === source.droppableId) {
-        movingObj = columnObj[source.droppableId][source.index]
         mutatingColumnObject = columnObj
       }
     })
 
-    mutatingColumnObject[source.droppableId].splice(source.index, 1)
-    mutatingColumnObject[source.droppableId].splice(
-      destination.index,
-      0,
-      movingObj
-    )
+    mutatingColumnObject.tasks.forEach(task => {
+      if (task._id === draggableId) {
+        movingObj = task
+      }
+    })
+
+    mutatingColumnObject.tasks.splice(source.index, 1)
+    mutatingColumnObject.tasks.splice(destination.index, 0, movingObj)
 
     const sendingObject = {
       movedTaskId: draggableId,
@@ -54,7 +55,7 @@ const Tasks = () => {
       .catch(err => console.error('🐻' + err))
 
     // TODO: this implementation will only work with one column
-    setColumns([mutatingColumnObject])
+    setColumns([...columns, mutatingColumnObject])
   }
 
   return (

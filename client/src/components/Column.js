@@ -20,8 +20,8 @@ const Column = ({ column }) => {
         {provided => (
           <Box ref={provided.innerRef} {...provided.droppableProps}>
             <Stack>
-              {column[column._id] &&
-                column[column._id].map((task, idx) => (
+              {column.tasks &&
+                column.tasks.map((task, idx) => (
                   <Task key={task._id} task={task} index={idx} />
                 ))}
               {provided.placeholder}
