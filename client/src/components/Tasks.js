@@ -32,10 +32,12 @@ const Tasks = () => {
 
     let startColumn = {}
     let finishColumn = {}
+    let singleColumn = {}
 
     columns.forEach(column => {
       if (column._id === source.droppableId) {
         startColumn = { ...column }
+        singleColumn = { ...column }
       }
       if (column._id === destination.droppableId) {
         finishColumn = { ...column }
@@ -44,7 +46,7 @@ const Tasks = () => {
 
     const newStartTaskArray = Array.from(startColumn.tasks)
     const newFinishTaskArray = Array.from(finishColumn.tasks)
-    const singleTaskArray = Array.from(finishColumn.tasks)
+    const singleTaskArray = Array.from(singleColumn.tasks)
 
     let movingTask = {}
 
@@ -69,33 +71,57 @@ const Tasks = () => {
       tasks: newFinishTaskArray,
     }
 
+    const newSingleColumn = {
+      ...singleColumn,
+      tasks: singleTaskArray,
+    }
+
     if (newStartColumn._id === newFinishColumn._id) {
-      return
-    }
+      let newColumnArray = columns.map(column => {
+        if (column._id === newSingleColumn._id) {
+          return newSingleColumn
+        }
+        return column
+      })
 
-    let newColumnArray = columns.map(column => {
-      if (column._id === newStartColumn._id) {
-        return newStartColumn
+      const sendingObject = {
+        movedTaskId: draggableId,
+        fromColumn: source.droppableId,
+        toColumn: destination.droppableId,
+        fromIndex: source.index,
+        toIndex: destination.index,
       }
-      if (column._id === newFinishColumn._id) {
-        return newFinishColumn
+
+      TaskService.moveTask(sendingObject)
+        .then(res => console.log(res))
+        .catch(err => console.error('🐻' + err))
+
+      setColumns(newColumnArray)
+    } else {
+      let newColumnArray = columns.map(column => {
+        if (column._id === newStartColumn._id) {
+          return newStartColumn
+        }
+        if (column._id === newFinishColumn._id) {
+          return newFinishColumn
+        }
+        return column
+      })
+
+      const sendingObject = {
+        movedTaskId: draggableId,
+        fromColumn: source.droppableId,
+        toColumn: destination.droppableId,
+        fromIndex: source.index,
+        toIndex: destination.index,
       }
-      return column
-    })
 
-    const sendingObject = {
-      movedTaskId: draggableId,
-      fromColumn: source.droppableId,
-      toColumn: destination.droppableId,
-      fromIndex: source.index,
-      toIndex: destination.index,
+      TaskService.moveTask(sendingObject)
+        .then(res => console.log(res))
+        .catch(err => console.error('🐻' + err))
+
+      setColumns(newColumnArray)
     }
-
-    TaskService.moveTask(sendingObject)
-      .then(res => console.log(res))
-      .catch(err => console.error('🐻' + err))
-
-    setColumns(newColumnArray)
   }
 
   return (
