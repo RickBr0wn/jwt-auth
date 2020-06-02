@@ -30,35 +30,55 @@ const Tasks = () => {
       return
     }
 
-    let movingColumn = {}
+    let startColumn = {}
+    let finishColumn = {}
 
     columns.forEach(column => {
       if (column._id === source.droppableId) {
-        movingColumn = { ...column }
+        startColumn = { ...column }
+      }
+      if (column._id === destination.droppableId) {
+        finishColumn = { ...column }
       }
     })
 
-    const newTaskArray = Array.from(movingColumn.tasks)
+    const newStartTaskArray = Array.from(startColumn.tasks)
+    const newFinishTaskArray = Array.from(finishColumn.tasks)
+    const singleTaskArray = Array.from(finishColumn.tasks)
 
     let movingTask = {}
 
-    newTaskArray.forEach(task => {
+    newStartTaskArray.forEach(task => {
       if (task._id === draggableId) {
         movingTask = { ...task }
       }
     })
 
-    newTaskArray.splice(source.index, 1)
-    newTaskArray.splice(destination.index, 0, { ...movingTask })
+    newStartTaskArray.splice(source.index, 1)
+    newFinishTaskArray.splice(destination.index, 0, { ...movingTask })
+    singleTaskArray.splice(source.index, 1)
+    singleTaskArray.splice(destination.index, 0, { ...movingTask })
 
-    const newColumn = {
-      ...movingColumn,
-      tasks: newTaskArray,
+    const newStartColumn = {
+      ...startColumn,
+      tasks: newStartTaskArray,
+    }
+
+    const newFinishColumn = {
+      ...finishColumn,
+      tasks: newFinishTaskArray,
+    }
+
+    if (newStartColumn._id === newFinishColumn._id) {
+      return
     }
 
     let newColumnArray = columns.map(column => {
-      if (column._id === newColumn._id) {
-        return newColumn
+      if (column._id === newStartColumn._id) {
+        return newStartColumn
+      }
+      if (column._id === newFinishColumn._id) {
+        return newFinishColumn
       }
       return column
     })
