@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import TaskService from '../services/TaskService'
 import { DragDropContext } from 'react-beautiful-dnd'
-import { Box } from '@chakra-ui/core'
+import { Flex } from '@chakra-ui/core'
 import Column from './Column'
 
 const Tasks = () => {
@@ -14,9 +14,15 @@ const Tasks = () => {
   }, [])
 
   const onDragEnd = ({ destination, source, draggableId }) => {
+    //  draggableId: "5ebbda333ff1980a0d16f081"}
+    //  type: 'TYPE'
+    //  reason: 'DROP'
+    //  destination: {droppableId: "5ec6912213debd20d73ce27b", index: 1}
+    //  source: { droppableId: "5ec6912213debd20d73ce27b", index: 0 }
     if (!destination) {
       return
     }
+
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
@@ -24,45 +30,106 @@ const Tasks = () => {
       return
     }
 
-    let movingObj = {}
-    let mutatingColumnObject = {}
+    let startColumn = {}
+    let finishColumn = {}
+    let singleColumn = {}
 
-    columns.forEach(columnObj => {
-      if (columnObj._id === source.droppableId) {
-        movingObj = columnObj[source.droppableId][source.index]
-        mutatingColumnObject = columnObj
+    columns.forEach(column => {
+      if (column._id === source.droppableId) {
+        startColumn = { ...column }
+        singleColumn = { ...column }
+      }
+      if (column._id === destination.droppableId) {
+        finishColumn = { ...column }
       }
     })
 
-    mutatingColumnObject[source.droppableId].splice(source.index, 1)
-    mutatingColumnObject[source.droppableId].splice(
-      destination.index,
-      0,
-      movingObj
-    )
+    const newStartTaskArray = Array.from(startColumn.tasks)
+    const newFinishTaskArray = Array.from(finishColumn.tasks)
+    const singleTaskArray = Array.from(singleColumn.tasks)
 
-    const sendingObject = {
-      movedTaskId: draggableId,
-      fromColumn: source.droppableId,
-      toColumn: destination.droppableId,
-      fromIndex: source.index,
-      toIndex: destination.index,
+    let movingTask = {}
+
+    newStartTaskArray.forEach(task => {
+      if (task._id === draggableId) {
+        movingTask = { ...task }
+      }
+    })
+
+    newStartTaskArray.splice(source.index, 1)
+    newFinishTaskArray.splice(destination.index, 0, { ...movingTask })
+    singleTaskArray.splice(source.index, 1)
+    singleTaskArray.splice(destination.index, 0, { ...movingTask })
+
+    const newStartColumn = {
+      ...startColumn,
+      tasks: newStartTaskArray,
     }
 
-    TaskService.moveTask(sendingObject)
-      .then(res => console.warn(res))
-      .catch(err => console.error('🐻' + err))
+    const newFinishColumn = {
+      ...finishColumn,
+      tasks: newFinishTaskArray,
+    }
 
-    // TODO: this implementation will only work with one column
-    setColumns([mutatingColumnObject])
+    const newSingleColumn = {
+      ...singleColumn,
+      tasks: singleTaskArray,
+    }
+
+    if (newStartColumn._id === newFinishColumn._id) {
+      let newColumnArray = columns.map(column => {
+        if (column._id === newSingleColumn._id) {
+          return newSingleColumn
+        }
+        return column
+      })
+
+      const sendingObject = {
+        movedTaskId: draggableId,
+        fromColumn: source.droppableId,
+        toColumn: destination.droppableId,
+        fromIndex: source.index,
+        toIndex: destination.index,
+      }
+
+      TaskService.moveTask(sendingObject)
+        .then(res => console.log(res))
+        .catch(err => console.error('🐻' + err))
+
+      setColumns(newColumnArray)
+    } else {
+      let newColumnArray = columns.map(column => {
+        if (column._id === newStartColumn._id) {
+          return newStartColumn
+        }
+        if (column._id === newFinishColumn._id) {
+          return newFinishColumn
+        }
+        return column
+      })
+
+      const sendingObject = {
+        movedTaskId: draggableId,
+        fromColumn: source.droppableId,
+        toColumn: destination.droppableId,
+        fromIndex: source.index,
+        toIndex: destination.index,
+      }
+
+      TaskService.moveTask(sendingObject)
+        .then(res => console.log(res))
+        .catch(err => console.error('🐻' + err))
+
+      setColumns(newColumnArray)
+    }
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Box width="100vw" marginTop="20px">
+      <Flex width="100vw" marginTop="20px" flexDirection="row">
         {columns.length > 0 &&
           columns.map(column => <Column key={column._id} column={column} />)}
-      </Box>
+      </Flex>
     </DragDropContext>
   )
 }
